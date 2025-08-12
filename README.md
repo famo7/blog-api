@@ -131,14 +131,27 @@ Authorization: Bearer <your-jwt-token>
 
 ```
 ├── src/
-│   ├── controllers/     # Route controllers
-│   ├── middleware/      # Custom middleware
-│   ├── routes/         # API routes
-│   └── utils/          # Utility functions
+│   ├── config/         # Configuration files
+│   ├── controllers/    # Route controllers
+│   │   ├── authController.js
+│   │   ├── commentController.js
+│   │   └── postController.js
+│   ├── middleware/     # Custom middleware
+│   │   └── auth.js     # Authentication middleware
+│   ├── models/         # Data models (if any)
+│   └── routes/         # API routes
+│       ├── auth.js     # Authentication routes
+│       ├── comments.js # Comment routes
+│       └── posts.js    # Post routes
 ├── prisma/
 │   ├── schema.prisma   # Database schema
 │   └── migrations/     # Database migrations
-├── .env.example        # Environment variables template
+├── http/               # HTTP test files (ignored by git)
+│   ├── auth.http
+│   ├── comment.http
+│   └── posts.http
+├── package.json        # Project dependencies
+├── README.md          # Project documentation
 └── app.js             # Application entry point
 ```
 
