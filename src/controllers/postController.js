@@ -92,6 +92,7 @@ exports.getPostById = async (req, res) => {
         id: true,
         title: true,
         content: true,
+        published: true,
         createdAt: true,
         updatedAt: true,
         author: {
@@ -128,7 +129,7 @@ exports.createPost = async (req, res) => {
       return res.status(403).json({ message: 'Only authors can create posts' });
     }
 
-    const { title, content } = req.body;
+    const { title, content, published = false } = req.body;
 
     // Get the author record for the user
     const author = await prisma.author.findUnique({
@@ -143,6 +144,7 @@ exports.createPost = async (req, res) => {
       data: {
         title,
         content,
+        published,
         authorId: author.id,
       },
       include: {
@@ -182,10 +184,16 @@ exports.updatePost = async (req, res) => {
         .status(403)
         .json({ message: 'You do not have permission to update this post' });
     }
-    const { title, content } = req.body;
+    const { title, content, published } = req.body;
+    const updateData = {};
+
+    if (title !== undefined) updateData.title = title;
+    if (content !== undefined) updateData.content = content;
+    if (published !== undefined) updateData.published = published;
+
     const updatedPost = await prisma.post.update({
       where: { id: postId },
-      data: { title, content },
+      data: updateData,
     });
     res.status(200).json(updatedPost);
   } catch (error) {
