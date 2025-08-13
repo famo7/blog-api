@@ -6,10 +6,14 @@ const prisma = new PrismaClient();
 exports.getAllPosts = async (req, res) => {
   try {
     const posts = await prisma.post.findMany({
+      where: {
+        published: true,
+      },
       select: {
         id: true,
         title: true,
         content: true,
+        published: true,
         createdAt: true,
         updatedAt: true,
         author: {
@@ -33,6 +37,50 @@ exports.getAllPosts = async (req, res) => {
   } catch (error) {
     console.error('Error fetching posts:', error);
     res.status(500).json({ message: 'Error fetching posts' });
+  }
+};
+
+exports.getAllUnpublishedPosts = async (req, res) => {
+  try {
+    // Check if user has AUTHOR role
+    if (req.user.role !== 'AUTHOR') {
+      return res
+        .status(403)
+        .json({ message: 'Only authors can view unpublished posts' });
+    }
+
+    const posts = await prisma.post.findMany({
+      where: {
+        published: false,
+      },
+      select: {
+        id: true,
+        title: true,
+        content: true,
+        published: true,
+        createdAt: true,
+        updatedAt: true,
+        author: {
+          select: {
+            user: {
+              select: {
+                name: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    const simplifiedPosts = posts.map((post) => ({
+      ...post,
+      author: post.author?.user ? { name: post.author.user.name } : null,
+    }));
+
+    res.status(200).json(simplifiedPosts);
+  } catch (error) {
+    console.error('Error fetching unpublished posts:', error);
+    res.status(500).json({ message: 'Error fetching unpublished posts' });
   }
 };
 
